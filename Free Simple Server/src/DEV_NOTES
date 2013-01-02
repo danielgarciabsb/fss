@@ -1,0 +1,40 @@
+/*	fprintf(stderr, "IP: %d\n", Targs->ServerAt->Port);
+
+	LogConnection(inet_ntoa(Targs->ServerAt->ClientAtts[Targs->ServerAt->Pcount - 1].sin_addr));
+
+	int recvMsgSize;
+	
+	
+/*
+	while(1)
+	{
+		if ((recvMsgSize = recv(clntSocket, echoBuffer, RCVBUFSIZE, 0)) < 0)
+        	LogError("recv() failed");
+        
+        
+	}
+
+
+	PInfo Player;
+	PGInfo PlayerGameInfo;
+
+	Player.name = GetPlayerNameFromClient(threadargs, &Player);
+
+	close(*(threadargs->Players[threadargs->Player]));*/
+	
+		/*AddPacket(&Controll, 0, 0);
+	AddPacket(&Controll, 1, 1);
+	AddPacket(&Controll, 2, 2);
+	AddPacket(&Controll, 3, 3);
+	
+	ShowPackets(&First);
+	
+	ClearQueue(&Controll);
+	AddPacket(&Controll, 4, 4);
+	AddPacket(&Controll, 5, 5);
+	AddPacket(&Controll, 6, 6);
+	AddPacket(&Controll, 7, 7);
+	ShowPackets(Controll.FirstPacket);
+	RemovePacket(Controll.FirstPacket);
+	RemovePacket(Controll.FirstPacket);
+	ShowPackets(Controll.FirstPacket);*/
