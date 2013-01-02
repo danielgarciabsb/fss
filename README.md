@@ -16,7 +16,7 @@ __...__
 
 __README is under development too!__
 
-License
+Licence
 -------
 
 ### All program content is licensed under GNU General Public License
