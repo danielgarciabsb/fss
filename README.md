@@ -1,7 +1,7 @@
 Free Simple Server - DEV
 ========================
 
-Free Simple Server is a C server under development!
+Free Simple Server is a C linux server under development!
 
 It uses threads for handling client connections and dealing packets through client to client and the server.
 
