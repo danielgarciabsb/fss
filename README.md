@@ -1,7 +1,7 @@
 Free Simple Server - DEV
 ========================
 
-Free Simple Server is a C server under development!
+Free Simple Server is a C linux server under development!
 
 __You can see all the Development Files under branch 'dev'__
 
