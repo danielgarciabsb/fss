@@ -7,6 +7,8 @@
 Authors:
 	Daniel Garcia <contato@danielgarciaweb.com>
 
+Licence:
+
 This file is part of Free Simple Server
 
 This program is free software; you can redistribute it and/or modify
@@ -23,13 +25,16 @@ See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software Foundation,
 Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
-Or access: <http://www.gnu.org/licenses/>
+
+Online license:
+http://www.gnu.org/licenses/
+http://www.gnu.org/licenses/gpl.html
 
 */
 
 #include "ConfigFromFile.h"
 
-char ReadConfigFromFile(const char * filename, ServerAtts * ServerAt)
+char ReadBinaryConfigFromFile(const char * filename, ServerAtts * ServerAt)
 {
 	FILE * file;
 	if((file = fopen(filename, "rb")) != NULL)
@@ -44,7 +49,7 @@ char ReadConfigFromFile(const char * filename, ServerAtts * ServerAt)
 	return 0;
 }
 
-char WriteConfigToFile(const char * filename, ServerAtts * ServerAt)
+char WriteBinaryConfigToFile(const char * filename, ServerAtts * ServerAt)
 {
 	FILE * file;
 	if((file = fopen(filename, "wb")) != NULL)
@@ -58,4 +63,121 @@ char WriteConfigToFile(const char * filename, ServerAtts * ServerAt)
 	
 	LogErrorAndExit("WriteConfigToFile(): Failed to open file to write");
 	return 0;
+}
+
+
+/*
+
+  * Signature:    static char IsAlpha(char buffer)
+  * Description:  Check if the given char is an alphanumeric character
+
+  * @todo         Optimize performance in a new version
+  * @example      IsAlpha('A'); // returns 1 (True)
+  * @parameter    char buffer
+  * @return       char (True or false)
+
+*/
+
+static char IsAlpha(char buffer)
+{
+  if(( buffer >= '0' && buffer <= '9') || ( buffer >= 'A' && buffer <= 'Z' ) || ( buffer >= 'a' && buffer <= 'z' ))
+    return 1;
+  return 0;
+}
+
+/*
+
+  * Signature:    static void GetParameterValueFromFile(FILE * file, char * parameter)
+  * Description:  Reads the configuration file from a given position and
+                  get the parameter value.
+
+  * @todo         Optimize performance in a new version
+  * @example      GetParameterValueFromFile(FILE, "Port");
+  * @parameter    FILE * file, char * parameter
+  * @return       void
+
+*/
+
+static void GetParameterValueFromFile(FILE * file, char * parameter)
+{
+  unsigned char buffer, count = 0, * value;
+  value = (unsigned char *) calloc (32, sizeof(unsigned char));
+  while(buffer != '\n')
+  {
+    if(feof(file) || count == 32) return;
+    fread(&buffer, sizeof(unsigned char), 1, file);
+
+    if(IsAlpha(buffer))
+    {
+      value[count] = buffer;
+      count++;
+    }
+  }
+}
+
+/*
+
+  * Signature:    static void GetParameterFromFile(const char * filename)
+  * Description:  Reads the configuration file from start and
+                  get the parameter name, passes the parameter
+                  name to GetParameterFromFile().
+
+  * @todo         Optimize performance in a new version
+  * @example      GetParameterFromFile("config.cfg");
+  * @parameter    const char * filename
+  * @return       void
+
+*/
+
+static void GetParameterFromFile(const char * filename)
+{
+  FILE * file;
+
+  if((file = fopen(filename, "r")) != NULL)
+  {
+    unsigned char buffer, count = 0, * parameter;
+
+    while(!feof(file))
+    {
+      fread(&buffer, sizeof(unsigned char), 1, file);
+      if(buffer == '[')
+      {
+        parameter = (unsigned char *) calloc (32, sizeof(unsigned char));
+        while(!feof(file))
+        {
+          fread(&buffer, sizeof(unsigned char), 1, file);
+
+          if( count == 32 || buffer == ']' )
+          {
+            GetParameterValueFromFile(file, parameter);
+            count = 0;
+            break;
+          }
+
+          if(IsAlpha(buffer))
+          {
+            parameter[count] = buffer;
+            count++;
+          }
+        }
+      }
+    }
+  }
+}
+
+/*
+
+  * Signature:    static char IsAlpha(char buffer)
+  * Description:  Set the server configuration ...
+
+  * @todo         Implement
+  * @example      SetServerConf("Port", "9000")
+  * @parameter    const char * parameter, const char * value
+  * @return       char
+
+*/
+
+static char SetServerConf(const char * parameter, const char * value)
+{
+
 }
