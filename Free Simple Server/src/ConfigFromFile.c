@@ -34,7 +34,38 @@ http://www.gnu.org/licenses/gpl.html
 
 #include "ConfigFromFile.h"
 
-char ReadBinaryConfigFromFile(const char * filename, ServerAtts * ServerAt)
+/*
+
+  * Signature:		static char IsAlpha(char c)
+  * Description:	Check if the given char is an alphanumeric character
+
+  * @todo			Optimize performance in a new version
+  * @example		IsAlpha('A'); // returns 1 (True)
+  * @parameter		char c
+  * @return			char (True or false)
+
+*/
+
+static char IsAlpha(char c)
+{
+	if(( c >= '0' && c <= '9') || ( c >= 'A' && c <= 'Z' ) || ( c >= 'a' && c <= 'z' ))
+		return 1;
+	return 0;
+}
+
+/*
+
+  * Signature:		char ReadBinaryConfigFromFile(const char * filename, ServerAtts * ServerAt)
+  * Description:	Check if the given char is an alphanumeric character
+
+  * @todo			Optimize performance in a new version
+  * @example		IsAlpha('A'); // returns 1 (True)
+  * @parameter		char c
+  * @return			char (True or false)
+
+*/
+
+static char ReadBinaryConfigFromFile(const char * filename, ServerAtts * ServerAt)
 {
 	FILE * file;
 	if((file = fopen(filename, "rb")) != NULL)
@@ -49,7 +80,7 @@ char ReadBinaryConfigFromFile(const char * filename, ServerAtts * ServerAt)
 	return 0;
 }
 
-char WriteBinaryConfigToFile(const char * filename, ServerAtts * ServerAt)
+static char WriteBinaryConfigToFile(const char * filename, ServerAtts * ServerAt)
 {
 	FILE * file;
 	if((file = fopen(filename, "wb")) != NULL)
@@ -65,119 +96,95 @@ char WriteBinaryConfigToFile(const char * filename, ServerAtts * ServerAt)
 	return 0;
 }
 
-
 /*
 
-  * Signature:    static char IsAlpha(char buffer)
-  * Description:  Check if the given char is an alphanumeric character
+	* Signature:	static char SetServerConf(const char * key, const char * value)
+	* Description:	Set the server configuration from
+					given keys and values
 
-  * @todo         Optimize performance in a new version
-  * @example      IsAlpha('A'); // returns 1 (True)
-  * @parameter    char buffer
-  * @return       char (True or false)
+	* @todo			Implement
+	* @example		SetServerConf("Port", "9000")
+	* @parameter	const char * parameter, const char * value
+	* @return		char
 
 */
 
-static char IsAlpha(char buffer)
+static char SetServerConf(const char * key, const char * value)
 {
-  if(( buffer >= '0' && buffer <= '9') || ( buffer >= 'A' && buffer <= 'Z' ) || ( buffer >= 'a' && buffer <= 'z' ))
-    return 1;
-  return 0;
+	printf("Parameter: [%s] Value:[%s]\n", parameter, value);
 }
 
 /*
 
-  * Signature:    static void GetParameterValueFromFile(FILE * file, char * parameter)
-  * Description:  Reads the configuration file from a given position and
-                  get the parameter value.
+	* Signature:	static void GetParameterFromFile(const char * filename)
+	* Description:	Reads the configuration file
+					Get the alphanumeric parameters key and value
+					Call SetServerConf with parameter and value
 
-  * @todo         Optimize performance in a new version
-  * @example      GetParameterValueFromFile(FILE, "Port");
-  * @parameter    FILE * file, char * parameter
-  * @return       void
+	* Input file type:
+	* Note: No spaces, slashes, dots.. Only 0..9, A..Z, a..z
 
-*/
+		[Key] = Value
+		[OtherKey] = OtherValue
 
-static void GetParameterValueFromFile(FILE * file, char * parameter)
-{
-  unsigned char buffer, count = 0, * value;
-  value = (unsigned char *) calloc (32, sizeof(unsigned char));
-  while(buffer != '\n')
-  {
-    if(feof(file) || count == 32) return;
-    fread(&buffer, sizeof(unsigned char), 1, file);
-
-    if(IsAlpha(buffer))
-    {
-      value[count] = buffer;
-      count++;
-    }
-  }
-}
-
-/*
-
-  * Signature:    static void GetParameterFromFile(const char * filename)
-  * Description:  Reads the configuration file from start and
-                  get the parameter name, passes the parameter
-                  name to GetParameterFromFile().
-
-  * @todo         Optimize performance in a new version
-  * @example      GetParameterFromFile("config.cfg");
-  * @parameter    const char * filename
-  * @return       void
+	* @todo			Optimize performance in a new version
+	* @example		GetParameterFromFile("config.cfg");
+	* @parameter	const char * filename
+	* @return		void
 
 */
 
-static void GetParameterFromFile(const char * filename)
+static char GetParameterFromFile(const char * filename)
 {
-  FILE * file;
+	FILE * file;
 
-  if((file = fopen(filename, "r")) != NULL)
-  {
-    unsigned char buffer, count = 0, * parameter;
+	if((file = fopen(filename, "r")) == NULL) return 0;
 
-    while(!feof(file))
-    {
-      fread(&buffer, sizeof(unsigned char), 1, file);
-      if(buffer == '[')
-      {
-        parameter = (unsigned char *) calloc (32, sizeof(unsigned char));
-        while(!feof(file))
-        {
-          fread(&buffer, sizeof(unsigned char), 1, file);
+	unsigned char buffer, count = 0, parameter[32], value[32];
 
-          if( count == 32 || buffer == ']' )
-          {
-            GetParameterValueFromFile(file, parameter);
-            count = 0;
-            break;
-          }
+	while(!feof(file))
+	{
+		fread(&buffer, sizeof(unsigned char), 1, file);
 
-          if(IsAlpha(buffer))
-          {
-            parameter[count] = buffer;
-            count++;
-          }
-        }
-      }
-    }
-  }
-}
+		if(buffer == '[')
+		{
+			while(!feof(file))
+			{
+				if(count == 31 || buffer == ']')
+				{
+					parameter[count] = '\0';
 
-/*
+					count = 0;
 
-  * Signature:    static char IsAlpha(char buffer)
-  * Description:  Set the server configuration ...
+					while(!feof(file) && buffer != '\n' && count < 31)
+					{
+						fread(&buffer, sizeof(unsigned char), 1, file);
 
-  * @todo         Implement
-  * @example      SetServerConf("Port", "9000")
-  * @parameter    const char * parameter, const char * value
-  * @return       char
+						if(IsAlpha(buffer))
+						{
+							value[count] = buffer;
+							if(!feof(file)) count++;
+						}
+					}
 
-*/
+					value[count] = '\0';
 
-static char SetServerConf(const char * parameter, const char * value)
-{
+					SetServerConf(parameter, value);
 
+					count = 0;
+					break;
+				}
+
+				fread(&buffer, sizeof(unsigned char), 1, file);
+
+				if(IsAlpha(buffer))
+				{
+					parameter[count] = buffer;
+					count++;
+				}
+			}
+		}
+	}
+	fclose(file);
+	return 1;
 }
